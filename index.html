@@ -2,19 +2,20 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>TTMX Dashboard</title>
+    <title>Pemsa Celaya - Inventario</title>
     
-    <!-- Configuración PWA (Pantalla Completa obligatoria para iOS y Android) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="TTMX">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pemsa App">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#dc2626">
     
-    <!-- Íconos y Manifest obligatorios para que Android lo acepte como App Nativa -->
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1068/1068069.png">
-    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22TTMX%20Dashboard%22%2C%22short_name%22%3A%22TTMX%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22%2F%22%2C%22background_color%22%3A%22%23f3f4f6%22%2C%22theme_color%22%3A%22%23dc2626%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F1068%2F1068069.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+    <meta name="theme-color" content="#1b2229">
+    
+    <link rel="apple-touch-icon" href="https://media.licdn.com/dms/image/v2/D4D0BAQHYs5F-SB0sNw/company-logo_200_200/company-logo_200_200/0/1737024517068/cie_automotive_logo?e=2147483647&v=beta&t=QgeXdcEGAHxVJ9Ln7p7R0UwZKJPFwDQXnC5UhnvlFtU">
+    <link rel="icon" type="image/png" href="https://media.licdn.com/dms/image/v2/D4D0BAQHYs5F-SB0sNw/company-logo_200_200/company-logo_200_200/0/1737024517068/cie_automotive_logo?e=2147483647&v=beta&t=QgeXdcEGAHxVJ9Ln7p7R0UwZKJPFwDQXnC5UhnvlFtU">
+
+    <link rel="manifest" href='data:application/json,{"name":"Pemsa Celaya Inventario","short_name":"Pemsa","display":"standalone","start_url":".","background_color":"#1b2229","theme_color":"#f59e0b","icons":[{"src":"https://media.licdn.com/dms/image/v2/D4D0BAQHYs5F-SB0sNw/company-logo_200_200/company-logo_200_200/0/1737024517068/cie_automotive_logo?e=2147483647&v=beta&t=QgeXdcEGAHxVJ9Ln7p7R0UwZKJPFwDQXnC5UhnvlFtU","sizes":"200x200","type":"image/png"}]}'>
 
     <style>
         body, html {
@@ -23,7 +24,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden; 
-            background-color: #f3f4f6; 
+            background-color: #1b2229; /* Fondo Marino CIE */
         }
         iframe {
             width: 100vw;
@@ -31,10 +32,19 @@
             border: none;
             display: block;
         }
+        /* Ajuste automático para el notch en celulares modernos */
+        @supports (padding: max(0px)) {
+            body {
+                padding-top: env(safe-area-inset-top);
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- PEGA TU ENLACE DE GOOGLE SCRIPT AQUÍ ABAJO DENTRO DE LAS COMILLAS DEL SRC -->
-    <iframe src="https://script.google.com/macros/s/AKfycbxIGvO3G3uQzM8Hban5REYlI8yy_jx5ODmnmalwlPkKIcdUwKmFZSpgQQy3me_qoCJo/exec" allowfullscreen></iframe>
+    <iframe 
+        src="https://script.google.com/macros/s/AKfycbxIGvO3G3uQzM8Hban5REYlI8yy_jx5ODmnmalwlPkKIcdUwKmFZSpgQQy3me_qoCJo/exec" 
+        allow="camera; microphone; geolocation" 
+        allowfullscreen>
+    </iframe>
 </body>
 </html>
