@@ -2,20 +2,19 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Pemsa App</title>
+    <title>Pemsa Dashboard</title>
     
+    <!-- Configuración PWA (Pantalla Completa obligatoria para iOS y Android) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Pemsa">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1b2229">
     
-    <meta name="theme-color" content="#FFFFFF">
-    
-    <link rel="apple-touch-icon" href="cielogo.jpg">
-    <link rel="icon" type="image/jpeg" href="cielogo.jpg">
-    
-    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Pemsa%20App%22%2C%22short_name%22%3A%22Pemsa%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22%2F%22%2C%22background_color%22%3A%22%23002366%22%2C%22theme_color%22%3A%22%23002366%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22cielogo.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D">
+    <!-- Íconos y Manifest obligatorios para que Android lo acepte como App Nativa -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1068/1068069.png">
+    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Pemsa%20Dashboard%22%2C%22short_name%22%3A%22Pemsa%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22%2F%22%2C%22background_color%22%3A%22%23f3f4f6%22%2C%22theme_color%22%3A%22%23dc2626%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F1068%2F1068069.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
 
     <style>
         body, html {
@@ -24,30 +23,18 @@
             width: 100%;
             height: 100%;
             overflow: hidden; 
-            background-color: #FFFFFF; /* Fondo azul marino durante la carga */
+            background-color: #f3f4f6; 
         }
         iframe {
             width: 100vw;
             height: 100vh;
             border: none;
             display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
         }
     </style>
 </head>
 <body>
+    <!-- PEGA TU ENLACE DE GOOGLE SCRIPT AQUÍ ABAJO DENTRO DE LAS COMILLAS DEL SRC -->
     <iframe src="https://script.google.com/macros/s/AKfycbzYaOSqKVqs38pvgZ_SYuce-7LzeGfjfo7138TYizJNpTSpUKlYhYIGQ_DZesGdvZbK/exec" allowfullscreen></iframe>
-
-    <script>
-        // Service Worker interno para habilitar la instalación en el móvil
-        if ('serviceWorker' in navigator) {
-            const swCode = "self.addEventListener('fetch', function(e){});";
-            const blob = new Blob([swCode], {type: 'text/javascript'});
-            const url = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(url);
-        }
-    </script>
 </body>
 </html>
