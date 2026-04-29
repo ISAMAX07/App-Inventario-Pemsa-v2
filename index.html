@@ -2,51 +2,1165 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Pemsa App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CIE Pemsa Celaya - Inventario</title>
     
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- MINIATURA / ICONO DE LA APP -->
+    <link rel="icon" type="image/png" href="https://media.licdn.com/dms/image/v2/D4D0BAQHYs5F-SB0sNw/company-logo_200_200/company-logo_200_200/0/1737024517068/cie_automotive_logo?e=2147483647&v=beta&t=QgeXdcEGAHxVJ9Ln7p7R0UwZKJPFwDQXnC5UhnvlFtU">
+    <link rel="apple-touch-icon" href="https://media.licdn.com/dms/image/v2/D4D0BAQHYs5F-SB0sNw/company-logo_200_200/company-logo_200_200/0/1737024517068/cie_automotive_logo?e=2147483647&v=beta&t=QgeXdcEGAHxVJ9Ln7p7R0UwZKJPFwDQXnC5UhnvlFtU">
+    <link rel="shortcut icon" href="https://media.licdn.com/dms/image/v2/D4D0BAQHYs5F-SB0sNw/company-logo_200_200/company-logo_200_200/0/1737024517068/cie_automotive_logo?e=2147483647&v=beta&t=QgeXdcEGAHxVJ9Ln7p7R0UwZKJPFwDQXnC5UhnvlFtU">
+
+    <!-- Configuración para modo App Nativa -->
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Pemsa">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="CIE Pemsa">
     
-    <meta name="theme-color" content="#002366">
-    
-    <link rel="apple-touch-icon" href="cielogo.jpg">
-    <link rel="icon" type="image/jpeg" href="cielogo.jpg">
-    
-    <link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Pemsa%20App%22%2C%22short_name%22%3A%22Pemsa%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22%2F%22%2C%22background_color%22%3A%22%23002366%22%2C%22theme_color%22%3A%22%23002366%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22cielogo.jpg%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fjpeg%22%7D%5D%7D">
+    <!-- Manifiesto Web para Instalación -->
+    <link rel="manifest" href="data:application/manifest+json,{'name':'CIE Pemsa Celaya','short_name':'CIE Pemsa','start_url':'/exec','display':'standalone','background_color':'#1b2229','theme_color':'#f59e0b'}">
 
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconos -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Scanner Librería -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; 
-            background-color: #002366; /* Fondo azul marino durante la carga */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+        
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        iframe {
-            width: 100vw;
-            height: 100vh;
-            border: none;
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
+
+        .loader-spin {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #f59e0b;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .bg-cie-dark { background-color: #1b2229; } 
+        .text-cie-orange { color: #f59e0b; } 
+        .bg-cie-orange { background-color: #f59e0b; }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .elegant-glow-input {
+            transition: all 0.4s ease;
+            background: white;
+            border: 2px solid #e2e8f0;
+        }
+        .elegant-glow-input:focus-within {
+            border-color: #d8b4fe;
+            box-shadow: 0 0 25px rgba(216, 180, 254, 0.5), 0 0 5px rgba(216, 180, 254, 0.3);
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border-radius: 2.5rem;
+        }
+        
+        .data-grid-item {
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            padding: 1.25rem;
+            transition: transform 0.2s ease;
+        }
+        .data-grid-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
         }
     </style>
 </head>
-<body>
-    <iframe src="https://script.google.com/macros/s/AKfycbxS05E_TnT93EUFGU-c8nafLnx7S8GTf_oj27XcTQM-8gZa_WbC6xF7BR6P3IO4BdKU/exec" allowfullscreen></iframe>
+<body class="bg-slate-50 text-slate-800 antialiased overflow-x-hidden">
 
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[999] flex flex-col gap-3"></div>
+
+    <div class="app-container">
+        <!-- PANTALLA 1: CARGA -->
+        <div id="vista-carga" class="fixed inset-0 bg-cie-dark z-[500] flex flex-col items-center justify-center transition-opacity duration-500">
+            <img 
+                src="https://cieautomotive.com/documents/10182/144466/CIE+Pemsa+Celaya+%28lineal%29.png/a279c6b7-c710-4ee1-8ef9-0d3df2b54406?t=1615812924016" 
+                alt="CIE Pemsa" 
+                class="h-24 sm:h-32 md:h-40 lg:h-48 w-auto object-contain mb-10 px-4 opacity-0 transition-opacity duration-700" 
+                onload="this.classList.remove('opacity-0')">
+            <div class="loader-spin"></div>
+            <p class="text-slate-400 mt-6 text-sm tracking-widest uppercase font-semibold">Cargando...</p>
+        </div>
+
+        <!-- BARRA DE NAVEGACIÓN -->
+        <nav id="navbar-principal" class="hidden bg-cie-dark text-white shadow-md sticky top-0 z-[100]">
+            <div class="w-full px-4 sm:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onclick="cambiarPantalla('vista-menu')">
+                        <img src="https://companieslogo.com/img/orig/CIE.MC-bec8d71d.png?t=1730477133" alt="CIE Logo" class="h-8 w-auto">
+                        <span class="font-bold text-lg tracking-tight hidden sm:block uppercase tracking-tighter">CIE <span class="font-light">Pemsa Celaya</span></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="hidden sm:flex flex-col items-end leading-tight">
+                            <span id="usuario-actual" class="text-sm font-bold uppercase tracking-wide text-slate-200">Usuario</span>
+                            <button onclick="cerrarSesion()" class="text-[10px] text-rose-500 hover:text-rose-400 uppercase font-bold transition-colors">Cerrar sesión</button>
+                        </div>
+                        <button onclick="cerrarSesion()" class="sm:hidden text-rose-500 hover:text-rose-400 transition-colors">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="flex-grow flex flex-col w-full">
+            
+            <!-- PANTALLA: LOGIN -->
+            <div id="vista-login" class="hidden fixed inset-0 bg-cie-dark z-[100] flex items-center justify-center p-4">
+                <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm border border-slate-200 fade-in text-center">
+                    <img src="https://companieslogo.com/img/orig/CIE.MC-bec8d71d.png?t=1730477133" class="h-12 mx-auto mb-6">
+                    <h2 class="text-3xl font-black text-slate-800 mb-1 tracking-tighter italic uppercase">BIENVENIDO</h2>
+                    <p class="text-slate-400 text-sm mb-8 font-medium">Control de Inventario</p>
+                    <form id="form-login" onsubmit="procesarLogin(event)" class="space-y-4 text-left">
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300"></i>
+                            <input type="text" id="login-usuario" required placeholder="Usuario" class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all font-semibold text-sm">
+                        </div>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300"></i>
+                            <input type="password" id="login-password" required placeholder="Contraseña" class="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none transition-all font-semibold text-sm">
+                        </div>
+                        <div id="login-error" class="text-rose-500 text-xs hidden text-center font-bold bg-rose-50 p-3 rounded-xl uppercase">Error de Acceso</div>
+                        <button type="submit" id="btn-login" class="w-full bg-cie-dark hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-all shadow-xl active:scale-95 uppercase tracking-widest text-xs">Iniciar Sesión</button>
+                        <p class="mt-6 text-center text-xs text-slate-500">¿No tienes cuenta? <button type="button" onclick="cambiarPantalla('vista-registro')" class="text-cie-orange font-bold hover:underline">Regístrate aquí</button></p>
+                    </form>
+                </div>
+            </div>
+
+            <!-- PANTALLA: REGISTRO -->
+            <div id="vista-registro" class="hidden fixed inset-0 bg-cie-dark z-[100] flex items-center justify-center p-4 overflow-y-auto">
+                <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm border border-slate-200 fade-in text-center my-auto">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-1">Registro</h2>
+                    <p class="text-slate-400 text-sm mb-8 font-medium">Crear cuenta nueva</p>
+                    <form id="form-registro" onsubmit="procesarRegistro(event)" class="space-y-4 text-left">
+                        <input type="text" id="reg-nombre" required placeholder="Nombre Completo" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500 font-semibold text-sm">
+                        <input type="text" id="reg-usuario" required placeholder="Usuario" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500 font-semibold text-sm">
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="password" id="reg-password" required placeholder="Clave" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500 font-semibold text-sm">
+                            <input type="password" id="reg-password-confirm" required placeholder="Confirmar" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500 font-semibold text-sm">
+                        </div>
+                        <div id="registro-error" class="text-rose-500 text-xs hidden text-center font-bold bg-rose-50 p-2 rounded-xl">Las claves no coinciden</div>
+                        <button type="submit" class="w-full bg-cie-orange hover:bg-orange-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all active:scale-95 uppercase tracking-widest text-xs">Crear cuenta</button>
+                        <p class="mt-6 text-center text-xs text-slate-500">¿Ya tienes cuenta? <button type="button" onclick="cambiarPantalla('vista-login')" class="text-cie-dark font-bold hover:underline">Inicia sesión</button></p>
+                    </form>
+                </div>
+            </div>
+
+            <!-- PANTALLA: MENÚ PRINCIPAL -->
+            <main id="vista-menu" class="hidden flex-grow max-w-lg mx-auto px-6 py-10 fade-in">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-black text-slate-800 tracking-tight uppercase">MENU PRINCIPAL</h2>
+                    <p class="text-slate-400 mt-2 text-sm font-medium italic">Gestión de Refacciones Pemsa</p>
+                </div>
+                
+                <div class="flex flex-col gap-5 w-full">
+                    <button onclick="intentarAcceso('Inventario')" class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-200 hover:shadow-xl transition-all group flex items-center gap-6 text-left">
+                        <div class="h-16 w-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-blue-600 group-hover:text-white transition-colors flex-shrink-0 shadow-inner"><i class="fas fa-boxes"></i></div>
+                        <div><h3 class="text-lg font-bold text-slate-800 uppercase tracking-tighter">Inventario General</h3><p class="text-xs text-slate-400">Existencias en tiempo real.</p></div>
+                    </button>
+
+                    <button onclick="intentarAcceso('Entradas')" class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-200 hover:shadow-xl transition-all group flex items-center gap-6 text-left">
+                        <div class="h-16 w-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-emerald-600 group-hover:text-white transition-colors flex-shrink-0 shadow-inner"><i class="fas fa-arrow-down"></i></div>
+                        <div><h3 class="text-lg font-bold text-slate-800 uppercase tracking-tighter">Entradas</h3><p class="text-xs text-slate-400">Recepción de material.</p></div>
+                    </button>
+
+                    <button onclick="abrirMovimientos('Salida')" class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-200 hover:shadow-xl transition-all group flex items-center gap-6 text-left">
+                        <div class="h-16 w-16 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-rose-600 group-hover:text-white transition-colors flex-shrink-0 shadow-inner"><i class="fas fa-arrow-up"></i></div>
+                        <div><h3 class="text-lg font-bold text-slate-800 uppercase tracking-tighter">Salidas</h3><p class="text-xs text-slate-400">Despacho de refacciones libre.</p></div>
+                    </button>
+
+                    <button onclick="intentarAcceso('Info')" class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-200 hover:shadow-xl transition-all group flex items-center gap-6 text-left">
+                        <div class="h-16 w-16 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-teal-600 group-hover:text-white transition-colors flex-shrink-0 shadow-inner"><i class="fas fa-info-circle"></i></div>
+                        <div><h3 class="text-lg font-bold text-slate-800 uppercase tracking-tighter">INFORMACIÓN DE REFACCIÓN</h3><p class="text-xs text-slate-400">Consulta de datos por pieza.</p></div>
+                    </button>
+
+                    <button onclick="intentarAcceso('Historial')" class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-200 hover:shadow-xl transition-all group flex items-center gap-6 text-left">
+                        <div class="h-16 w-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-purple-600 group-hover:text-white transition-colors flex-shrink-0 shadow-inner"><i class="fas fa-history"></i></div>
+                        <div><h3 class="text-lg font-bold text-slate-800 uppercase tracking-tighter">Historial de cambios</h3><p class="text-xs text-slate-400">Registro de salidas y fallas.</p></div>
+                    </button>
+                    
+                    <button onclick="intentarAcceso('Usuarios')" class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-200 hover:shadow-xl transition-all group flex items-center gap-6 text-left">
+                        <div class="h-16 w-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-indigo-600 group-hover:text-white transition-colors flex-shrink-0 shadow-inner"><i class="fas fa-users-cog"></i></div>
+                        <div><h3 class="text-lg font-bold text-slate-800 uppercase tracking-tighter">Gestión de Usuarios</h3><p class="text-xs text-slate-400">Permisos y roles de acceso.</p></div>
+                    </button>
+                </div>
+            </main>
+
+            <!-- PANTALLA: INVENTARIO -->
+            <main id="vista-inventario" class="hidden flex-grow w-full px-4 sm:px-10 py-8 fade-in">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 text-center sm:text-left">
+                    <div class="flex items-center gap-4 justify-center sm:justify-start">
+                        <button onclick="cambiarPantalla('vista-menu')" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-cie-orange transition-all"><i class="fas fa-chevron-left text-lg"></i></button>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tighter uppercase">Inventario General</h2>
+                    </div>
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 min-w-[140px] glass-card">
+                            <div class="h-8 w-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shadow-inner"><i class="fas fa-box text-sm"></i></div>
+                            <div><p class="text-[9px] font-bold text-slate-400 uppercase">Total Items</p><p id="stat-total" class="text-lg font-black leading-none">0</p></div>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 min-w-[140px] glass-card">
+                            <div class="h-8 w-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center shadow-inner"><i class="fas fa-triangle-exclamation text-sm"></i></div>
+                            <div><p class="text-[9px] font-bold text-slate-400 uppercase">Bajo Stock</p><p id="stat-bajas" class="text-lg font-black text-amber-600 leading-none">0</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="elegant-glow-input py-2 px-4 rounded-xl mb-8 flex flex-col sm:flex-row gap-3 max-w-5xl mx-auto">
+                    <div class="relative flex-grow">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 text-sm"></i>
+                        <input type="text" id="buscador" placeholder="BUSCAR REFACCIÓN O CÓDIGO..." class="w-full pl-10 pr-4 py-2 bg-transparent outline-none font-bold uppercase text-xs tracking-widest text-slate-700">
+                    </div>
+                    <button onclick="iniciarEscanerInventario()" class="bg-cie-dark text-white px-6 py-2 rounded-lg font-black flex items-center justify-center gap-2 transition-all hover:bg-slate-800 uppercase tracking-widest text-[9px]">
+                        <i class="fas fa-camera text-sm"></i> <span>ESCANEAR CÓDIGO</span>
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-12">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr class="bg-slate-50/80 border-b border-slate-100 text-slate-400 text-[9px] font-black uppercase tracking-[0.2em]">
+                                    <th class="p-4">No. Parte</th>
+                                    <th class="p-4">Nombre de la Refacción</th>
+                                    <th class="p-4">Robot Compatible</th>
+                                    <th class="p-4 text-center">Stock Actual</th>
+                                    <th class="p-4 text-center">Estatus</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-inventario" class="divide-y divide-slate-50 text-xs font-bold text-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <!-- PANTALLA: HISTORIAL DE CAMBIOS -->
+            <main id="vista-reportes" class="hidden flex-grow w-full px-4 sm:px-10 py-8 fade-in">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                    <div class="flex items-center gap-5">
+                        <button onclick="cambiarPantalla('vista-menu')" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-cie-orange transition-all"><i class="fas fa-chevron-left text-lg"></i></button>
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800 tracking-tighter uppercase leading-none mb-1">Historial de cambios</h2>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em]">Trazabilidad de salidas técnica</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Filtrar por:</span>
+                        <div class="bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-sm text-[10px] font-bold uppercase cursor-pointer hover:bg-slate-50">Hoy</div>
+                        <div class="bg-white px-4 py-1.5 rounded-full border border-slate-200 shadow-sm text-[10px] font-bold uppercase cursor-pointer hover:bg-slate-50">Semana</div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden mb-12 glass-card">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[1300px]">
+                            <thead>
+                                <tr class="bg-slate-800 text-white/70 text-[9px] font-black uppercase tracking-[0.3em]">
+                                    <th class="p-5">Fecha y Hora</th>
+                                    <th class="p-5">No. Parte</th>
+                                    <th class="p-5 text-center">Cant.</th>
+                                    <th class="p-5">Técnico Responsable</th>
+                                    <th class="p-5 text-center">Turno</th>
+                                    <th class="p-5 text-center">Celda</th>
+                                    <th class="p-5">Acción / Componente</th>
+                                    <th class="p-5">Descripción de Falla</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-historial" class="divide-y divide-slate-100 text-[10px] font-bold text-slate-600"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+            <!-- PANTALLA: INFORMACIÓN DE REFACCIÓN -->
+            <main id="vista-info" class="hidden flex-grow w-full max-w-5xl mx-auto px-6 py-12 fade-in">
+                <div class="flex items-center gap-4 mb-10">
+                    <button onclick="cambiarPantalla('vista-menu')" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-cie-orange transition-all"><i class="fas fa-chevron-left text-lg"></i></button>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tighter uppercase">INFORMACIÓN DE REFACCIÓN</h2>
+                </div>
+
+                <div class="elegant-glow-input py-2 px-5 rounded-xl mb-12 flex items-center gap-3 max-w-2xl mx-auto">
+                    <div class="flex-grow relative">
+                        <i class="fas fa-microchip absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 text-sm"></i>
+                        <input type="text" id="info-codigo" placeholder="INGRESA EL NO. DE PARTE..." class="w-full py-2 pl-10 pr-4 bg-transparent outline-none uppercase font-mono font-black text-sm tracking-widest text-slate-800" oninput="consultarInfoRefaccion()">
+                    </div>
+                    <button type="button" onclick="iniciarEscanerInfo()" class="h-8 w-8 bg-slate-900 text-white rounded-lg hover:bg-cie-orange transition-all shadow-md flex items-center justify-center"><i class="fas fa-camera text-xs"></i></button>
+                </div>
+
+                <div id="info-resultado" class="hidden animate-fade-in space-y-8">
+                    <div class="info-card p-8 relative overflow-hidden glass-card border-t-[5px] border-t-cie-orange rounded-3xl">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                            <div>
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.5em] mb-2">Refacción Técnica Identificada</p>
+                                <h3 id="info-nombre" class="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">---</h3>
+                            </div>
+                            <div id="info-status-badge" class="status-badge bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">Disponible</div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <div class="data-grid-item p-4">
+                                <p class="text-[8px] font-black text-slate-400 uppercase mb-2 flex items-center gap-2"><i class="fas fa-id-card-alt"></i> No. Parte</p>
+                                <p id="info-val-codigo" class="text-lg font-mono font-black text-slate-900 tracking-widest">---</p>
+                            </div>
+                            <div class="data-grid-item p-4 relative overflow-hidden">
+                                <p class="text-[8px] font-black text-slate-400 uppercase mb-2 flex items-center gap-2"><i class="fas fa-layer-group"></i> Existencia</p>
+                                <p id="info-val-stock" class="text-2xl font-black text-slate-900">0</p>
+                                <div id="info-stock-indicator" class="absolute bottom-0 left-0 h-1 bg-cie-orange transition-all duration-1000" style="width: 0%"></div>
+                            </div>
+                            <div class="data-grid-item p-4">
+                                <p class="text-[8px] font-black text-slate-400 uppercase mb-2 flex items-center gap-2"><i class="fas fa-robot"></i> Robot Compatible</p>
+                                <p id="info-val-robots" class="text-xs font-bold text-slate-700 uppercase">---</p>
+                            </div>
+                            <div class="data-grid-item p-4">
+                                <p class="text-[8px] font-black text-slate-400 uppercase mb-2 flex items-center gap-2"><i class="fas fa-map-marked-alt text-teal-600"></i> Ubicación</p>
+                                <p id="info-val-ubicacion" class="text-xs font-black text-teal-600 uppercase tracking-widest">SECTOR A-12</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 pt-8 border-t border-slate-100">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center text-lg"><i class="fas fa-exclamation-circle"></i></div>
+                                <div><p class="text-[8px] font-black text-slate-400 uppercase">Stock Mínimo</p><p id="info-val-min" class="font-black text-slate-800 text-base">---</p></div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center text-lg"><i class="fas fa-tools"></i></div>
+                                <div><p class="text-[8px] font-black text-slate-400 uppercase">Categoría</p><p id="info-val-cat" class="font-black text-slate-800 text-base uppercase">Mecánica</p></div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center text-lg"><i class="fas fa-history"></i></div>
+                                <div><p class="text-[8px] font-black text-slate-400 uppercase">Último Cambio</p><p id="info-val-fecha" class="font-black text-slate-800 text-xs uppercase">HOY</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="info-placeholder" class="py-20 text-center opacity-40">
+                    <i class="fas fa-search-plus text-6xl mb-5 text-slate-200"></i>
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-[0.5em]">INFORMACIÓN DE REFACCIÓN</p>
+                </div>
+            </main>
+
+            <!-- PANTALLA: REGISTRAR MOVIMIENTO -->
+            <main id="vista-movimientos" class="hidden flex-grow w-full max-w-4xl mx-auto px-6 py-10 fade-in">
+                <div class="flex items-center gap-4 mb-8">
+                    <button onclick="cambiarPantalla('vista-menu')" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-cie-orange transition-all"><i class="fas fa-chevron-left text-lg"></i></button>
+                    <h2 id="titulo-movimiento" class="text-2xl font-black text-slate-800 tracking-tighter uppercase">Movimiento de Material</h2>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
+                    <form id="form-movimiento" onsubmit="guardarMovimiento(event)" class="space-y-5">
+                        <input type="hidden" id="mov-tipo" value="">
+                        <input type="hidden" id="mov-refaccion-index" value="">
+                        
+                        <div id="indicador-movimiento" class="w-full py-2.5 px-6 rounded-xl font-black text-center uppercase tracking-[0.2em] text-xs bg-slate-50 border border-slate-100 shadow-sm transition-colors">
+                            SELECCIONE OPERACIÓN
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2 ml-1">1. NO. PARTE / SCAN</label>
+                                <div class="relative flex items-center mb-3">
+                                    <i class="fas fa-barcode absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-300 text-lg"></i>
+                                    <input type="text" id="mov-codigo" required placeholder="Escribe o Escanea..." class="w-full py-2.5 pl-12 pr-12 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-cie-orange outline-none uppercase font-mono font-black text-sm tracking-widest transition-all shadow-sm" oninput="buscarPiezaMovimiento()">
+                                    <button type="button" onclick="iniciarEscaner()" class="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 bg-white border border-slate-200 hover:border-cie-orange text-slate-400 hover:text-cie-orange rounded-lg transition-all shadow-sm flex items-center justify-center"><i class="fas fa-camera text-sm"></i></button>
+                                </div>
+                                <button type="button" onclick="abrirModal('modal-nuevo')" class="w-full py-2 flex items-center justify-center gap-2 bg-blue-900 text-white hover:bg-blue-800 rounded-xl text-[9px] font-black transition-all uppercase tracking-[0.2em] shadow-sm border-none">
+                                    <i class="fas fa-plus-circle text-xs"></i> <span>Alta de Refacción Nueva</span>
+                                </button>
+                            </div>
+
+                            <div class="bg-slate-50 border border-slate-100 p-5 rounded-2xl flex flex-col items-center justify-center">
+                                <label class="block text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Validación CIE</label>
+                                <input type="text" id="mov-nombre" readonly placeholder="---" class="w-full py-2.5 px-4 bg-white border border-slate-200 rounded-xl text-center text-slate-400 font-black text-xs outline-none uppercase tracking-tighter shadow-sm transition-colors">
+                            </div>
+                        </div>
+
+                        <div id="campos-tecnicos-salida" class="hidden space-y-5 pt-5 border-t border-slate-100">
+                            <p class="text-center text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-1">Detalle Técnico del Cambio</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="text" id="mov-reemplazado" placeholder="COMPONENTE REEMPLAZADO" class="elegant-glow-input w-full py-2 px-4 rounded-xl outline-none font-black text-[10px] uppercase tracking-widest shadow-sm">
+                                <input type="text" id="mov-accion" placeholder="ACCIÓN CORRECTIVA" class="elegant-glow-input w-full py-2 px-4 rounded-xl outline-none font-black text-[10px] uppercase tracking-widest shadow-sm">
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <input type="text" id="mov-tecnico" placeholder="NOMBRE DEL TÉCNICO" class="elegant-glow-input w-full py-2 px-4 rounded-xl outline-none font-black text-[10px] uppercase tracking-widest shadow-sm">
+                                <select id="mov-turno" class="elegant-glow-input w-full py-2 px-4 rounded-xl outline-none font-black text-[10px] uppercase tracking-widest shadow-sm cursor-pointer">
+                                    <option value="">SELECCIONAR TURNO...</option>
+                                    <option value="1">TURNO 1</option><option value="2">TURNO 2</option><option value="3">TURNO 3</option><option value="4">TURNO 4</option>
+                                </select>
+                                <input type="text" id="mov-celda" placeholder="CELDA / LÍNEA" class="elegant-glow-input w-full py-2 px-4 rounded-xl outline-none font-black text-[10px] uppercase tracking-widest shadow-sm">
+                            </div>
+                            <textarea id="mov-falla" rows="2" placeholder="DESCRIPCIÓN DE LA FALLA DETECTADA..." class="elegant-glow-input w-full py-2.5 px-4 rounded-xl outline-none font-bold text-[10px] uppercase tracking-widest resize-none shadow-sm"></textarea>
+                        </div>
+
+                        <div class="flex flex-col items-center pt-3 pb-1">
+                            <label id="label-cantidad" class="block text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2">CANTIDAD</label>
+                            <input type="number" id="mov-cantidad" min="1" required class="w-24 py-1.5 px-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500/20 focus:border-cie-orange outline-none font-black text-lg text-center shadow-sm">
+                        </div>
+                        
+                        <button type="submit" id="btn-submit-mov" disabled class="w-full bg-slate-200 text-slate-400 font-black py-3.5 rounded-xl transition-all uppercase tracking-[0.2em] cursor-not-allowed text-xs shadow-sm active:scale-[0.98]">ESPERANDO CÓDIGO VÁLIDO</button>
+                    </form>
+                </div>
+            </main>
+
+            <!-- PANTALLA: GESTIÓN DE USUARIOS -->
+            <main id="vista-usuarios" class="hidden flex-grow w-full max-w-5xl mx-auto px-6 py-12 fade-in">
+                <div class="flex items-center gap-4 mb-10">
+                    <button onclick="cambiarPantalla('vista-menu')" class="h-10 w-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-slate-200 text-slate-500 hover:text-cie-orange transition-all"><i class="fas fa-chevron-left text-lg"></i></button>
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tighter uppercase leading-none mb-1">Gestión de Usuarios</h2>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.25em]">Control de Accesos y Permisos</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden glass-card">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                       <h3 class="text-xs font-black text-slate-700 uppercase tracking-widest">Directorio de Personal</h3>
+                       <button onclick="abrirModal('modal-nuevo-usuario')" class="bg-blue-900 text-white px-5 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-md hover:bg-blue-800 transition-colors"><i class="fas fa-user-plus mr-2"></i> Nuevo Usuario</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead>
+                                <tr class="bg-slate-800 text-white/70 text-[9px] font-black uppercase tracking-[0.3em]">
+                                    <th class="p-5">Usuario (Login)</th>
+                                    <th class="p-5">Nombre Completo</th>
+                                    <th class="p-5 text-center">Nivel de Acceso</th>
+                                    <th class="p-5 text-center">Estado</th>
+                                    <th class="p-5 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-usuarios" class="divide-y divide-slate-100 text-xs font-bold text-slate-600">
+                                <!-- Contenido inyectado por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+
+    <!-- MODALES -->
+    <div id="modal-nuevo" class="fixed inset-0 bg-cie-dark/95 backdrop-blur-md hidden flex items-center justify-center z-[500] p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg modal-enter overflow-hidden my-auto" id="modal-nuevo-content">
+            <div class="bg-blue-900 p-6 text-white flex justify-between items-center border-b-4 border-cie-orange">
+                <div>
+                    <h2 class="text-xl font-black uppercase tracking-tighter mb-1 text-white">Alta de Refacción</h2>
+                    <p class="text-white opacity-80 text-[9px] font-black uppercase tracking-[0.2em]">Nuevo ítem al catálogo</p>
+                </div>
+                <button type="button" onclick="cerrarModal('modal-nuevo')" class="h-8 w-8 rounded-full hover:bg-blue-800 flex items-center justify-center transition-colors text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <form id="form-nuevo" onsubmit="guardarNuevaRefaccion(event)" class="p-6 space-y-5">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">No. Parte</label>
+                        <input type="text" id="nuevo-codigo" required placeholder="SKU" class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cie-orange outline-none font-mono uppercase font-black text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">Stock Mín.</label>
+                        <input type="number" id="nuevo-stock-minimo" required min="1" placeholder="Ej. 5" class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cie-orange outline-none font-black text-sm">
+                    </div>
+                </div>
+                <input type="text" id="nuevo-nombre" required placeholder="NOMBRE DE REFACCIÓN" class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cie-orange outline-none font-bold uppercase text-[10px]">
+                <input type="text" id="nuevo-robots" required placeholder="ROBOTS COMPATIBLES" class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-cie-orange outline-none font-bold uppercase text-[10px]">
+                <div class="pt-3 flex gap-3">
+                    <button type="button" onclick="cerrarModal('modal-nuevo')" class="flex-grow py-3 text-slate-400 font-black text-[9px] uppercase hover:bg-slate-50 rounded-xl transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-[2] bg-cie-orange text-white font-black py-3 rounded-xl shadow-md shadow-orange-500/20 uppercase text-[9px]">Guardar Catálogo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-escaner" class="fixed inset-0 bg-black/95 z-[600] hidden flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl">
+            <div class="p-5 flex justify-between items-center border-b">
+                <h2 class="font-black uppercase tracking-widest text-[10px]">Escanear Código</h2>
+                <button type="button" onclick="detenerEscaner()" class="text-slate-400 hover:text-slate-600 transition-colors"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div id="reader" class="w-full bg-black min-h-[250px]"></div>
+            <div class="p-5 text-center text-[9px] text-slate-400 font-black uppercase tracking-[0.3em] bg-slate-50">Enfoca el código de barras o QR</div>
+        </div>
+    </div>
+
+    <div id="modal-autorizacion" class="fixed inset-0 bg-cie-dark/95 backdrop-blur-md hidden flex items-center justify-center z-[500] p-4">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-sm text-center">
+            <div class="h-20 w-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-6 shadow-inner"><i class="fas fa-lock"></i></div>
+            <h2 class="text-xl font-black text-slate-800 mb-2 uppercase tracking-tighter leading-none">Acceso Restringido</h2>
+            <p class="text-slate-400 text-[10px] mb-8 font-bold uppercase tracking-widest leading-relaxed">Permisos de Administrador Requeridos</p>
+            <form id="form-autorizacion" onsubmit="procesarAutorizacion(event)" class="space-y-4">
+                <input type="text" id="auth-usuario" required placeholder="USUARIO ADMIN" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-black text-[10px] tracking-widest text-center">
+                <input type="password" id="auth-password" required placeholder="CONTRASEÑA" class="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all font-black text-[10px] tracking-widest text-center">
+                <div id="auth-error" class="text-rose-500 text-[9px] font-black uppercase hidden bg-rose-50 p-2 rounded-lg">Acceso denegado</div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="cerrarModal('modal-autorizacion')" class="flex-grow py-3 text-slate-400 font-black text-[9px] uppercase tracking-widest">Cancelar</button>
+                    <button type="submit" class="flex-[2] bg-rose-500 text-white font-black py-3 rounded-xl shadow-md shadow-rose-500/20 uppercase text-[9px] tracking-widest">Validar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Usuario -->
+    <div id="modal-nuevo-usuario" class="fixed inset-0 bg-cie-dark/95 backdrop-blur-md hidden flex items-center justify-center z-[500] p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md modal-enter overflow-hidden my-auto">
+            <div class="bg-blue-900 p-6 text-white flex justify-between items-center border-b-4 border-cie-orange">
+                <div>
+                    <h2 class="text-xl font-black uppercase tracking-tighter mb-1 text-white">Nuevo Usuario</h2>
+                    <p class="text-white opacity-80 text-[9px] font-black uppercase tracking-[0.2em]">Registro de personal</p>
+                </div>
+                <button type="button" onclick="cerrarModal('modal-nuevo-usuario')" class="h-8 w-8 rounded-full hover:bg-blue-800 flex items-center justify-center transition-colors text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <form id="form-nuevo-usuario" onsubmit="guardarNuevoUsuario(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">Nombre Completo</label>
+                    <input type="text" id="nu-nombre" required class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-bold uppercase text-[10px]">
+                </div>
+                <div>
+                    <label class="block text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">Usuario (Login)</label>
+                    <input type="text" id="nu-usuario" required class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono font-black text-xs">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">Contraseña</label>
+                        <input type="password" id="nu-password" required class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">Confirmar</label>
+                        <input type="password" id="nu-password-confirm" required class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-xs">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[9px] font-black text-slate-400 mb-2 uppercase tracking-widest">Nivel de Acceso</label>
+                    <select id="nu-rol" class="w-full py-2 px-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-black text-[10px] uppercase cursor-pointer">
+                        <option value="tecnico">Técnico</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <div class="pt-3 flex gap-3">
+                    <button type="button" onclick="cerrarModal('modal-nuevo-usuario')" class="flex-grow py-3 text-slate-400 font-black text-[9px] uppercase hover:bg-slate-50 rounded-xl transition-colors">Cancelar</button>
+                    <button type="submit" class="flex-[2] bg-blue-900 text-white font-black py-3 rounded-xl shadow-md shadow-blue-900/20 uppercase text-[9px] hover:bg-blue-800">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Confirmar Eliminar Usuario -->
+    <div id="modal-confirmar-eliminar" class="fixed inset-0 bg-cie-dark/95 backdrop-blur-md hidden flex items-center justify-center z-[600] p-4">
+        <div class="bg-white rounded-3xl p-8 shadow-2xl w-full max-w-sm text-center">
+            <div class="h-16 w-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center text-3xl mx-auto mb-4"><i class="fas fa-exclamation-triangle"></i></div>
+            <h2 class="text-lg font-black text-slate-800 mb-2 uppercase tracking-tighter">¿Eliminar Usuario?</h2>
+            <p id="texto-eliminar-usuario" class="text-slate-500 text-[10px] mb-6 font-bold uppercase tracking-widest">Se borrará permanentemente.</p>
+            <input type="hidden" id="index-eliminar-usuario">
+            <div class="flex gap-3">
+                <button type="button" onclick="cerrarModal('modal-confirmar-eliminar')" class="flex-grow py-3 bg-slate-100 text-slate-500 rounded-xl font-black text-[9px] uppercase hover:bg-slate-200 transition-colors">Cancelar</button>
+                <button type="button" onclick="confirmarEliminarUsuario()" class="flex-[2] bg-rose-500 text-white font-black py-3 rounded-xl shadow-md shadow-rose-500/20 uppercase text-[9px] hover:bg-rose-600 transition-colors">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE PROGRAMACIÓN -->
     <script>
-        // Service Worker interno para habilitar la instalación en el móvil
-        if ('serviceWorker' in navigator) {
-            const swCode = "self.addEventListener('fetch', function(e){});";
-            const blob = new Blob([swCode], {type: 'text/javascript'});
-            const url = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(url);
+        let inventario = [];
+        let historial = [];
+        // Base de datos de usuarios simulada para los permisos
+        let usuariosDb = [
+            { usuario: 'admin', nombre: 'Admin CIE', rol: 'admin', estado: 'Activo' },
+            { usuario: 'operador1', nombre: 'Juan Perez', rol: 'tecnico', estado: 'Activo' },
+            { usuario: 'operador2', nombre: 'Luis Gomez', rol: 'tecnico', estado: 'Activo' }
+        ];
+        
+        let usuarioActual = null;
+        let usernameLogueado = null;
+        let rolActual = 'tecnico'; // 'admin' o 'tecnico'
+        let moduloPendiente = null;
+        
+        let datosCargados = false;
+        let escanerCamara = null;
+
+        const isAppsScript = typeof google !== 'undefined' && google.script && google.script.run;
+        const todasLasVistas = ['vista-carga', 'vista-login', 'vista-registro', 'vista-menu', 'vista-inventario', 'vista-movimientos', 'vista-reportes', 'vista-info', 'vista-usuarios'];
+
+        window.onload = () => { setTimeout(() => cambiarPantalla('vista-login'), 1500); };
+
+        function mostrarToast(msg, tipo = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = tipo === 'error' ? 'bg-rose-600 shadow-rose-500/20' : 'bg-slate-900 shadow-slate-900/20';
+            toast.className = `${bg} text-white px-6 py-4 rounded-2xl shadow-xl font-black text-[9px] uppercase tracking-widest flex items-center gap-3 fade-in`;
+            toast.innerHTML = `<i class="fas ${tipo === 'error' ? 'fa-times-circle text-rose-300' : 'fa-check-circle text-emerald-400'} text-lg"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3500);
+        }
+
+        function cambiarPantalla(id) {
+            todasLasVistas.forEach(v => {
+                const vista = document.getElementById(v);
+                if(vista) vista.classList.add('hidden');
+            });
+            const activa = document.getElementById(id);
+            if(activa) activa.classList.remove('hidden');
+            
+            const nav = document.getElementById('navbar-principal');
+            if(nav) nav.classList.toggle('hidden', id === 'vista-carga' || id === 'vista-login' || id === 'vista-registro');
+            
+            if(id !== 'vista-info') {
+                const input = document.getElementById('info-codigo');
+                if(input) input.value = '';
+                consultarInfoRefaccion();
+            }
+            window.scrollTo(0,0);
+        }
+
+        function procesarLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-usuario').value.trim();
+            const p = document.getElementById('login-password').value.trim();
+            const btn = document.getElementById('btn-login');
+            btn.disabled = true; btn.innerText = 'AUTENTICANDO...';
+
+            if (!isAppsScript) {
+                if(p === '1234') {
+                    // Validar rol de usuario desde DB local
+                    let foundUser = usuariosDb.find(x => x.usuario === u);
+                    rolActual = foundUser ? foundUser.rol : (u === 'admin' ? 'admin' : 'tecnico');
+                    usuarioActual = foundUser ? foundUser.nombre : (u === 'admin' ? "Admin CIE" : "Operador Planta");
+                    usernameLogueado = u;
+                    
+                    // Restauramos el botón aquí también por si el login es exitoso
+                    btn.disabled = false;
+                    btn.innerText = 'Iniciar Sesión';
+                    
+                    loginExitoso();
+                } else {
+                    document.getElementById('login-error').classList.remove('hidden');
+                    btn.disabled = false; btn.innerText = 'Iniciar Sesión';
+                }
+            } else {
+                google.script.run.withSuccessHandler(res => {
+                    if(res.exito) { 
+                        usuarioActual = res.nombre; 
+                        usernameLogueado = u; 
+                        rolActual = res.rol || (u === 'admin' ? 'admin' : 'tecnico');
+                        
+                        btn.disabled = false;
+                        btn.innerText = 'Iniciar Sesión';
+                        
+                        loginExitoso(); 
+                    } else { 
+                        document.getElementById('login-error').classList.remove('hidden'); 
+                        btn.disabled = false; btn.innerText = 'Iniciar Sesión'; 
+                    }
+                }).validarUsuario(u, p);
+            }
+        }
+
+        function loginExitoso() {
+            document.getElementById('usuario-actual').innerText = usuarioActual;
+            cargarDatos();
+            cambiarPantalla('vista-menu');
+            mostrarToast(`Bienvenido ${usuarioActual}`);
+        }
+
+        function procesarRegistro(e) {
+            e.preventDefault();
+            const p = document.getElementById('reg-password').value;
+            const pc = document.getElementById('reg-password-confirm').value;
+            if(p !== pc) return document.getElementById('registro-error').classList.remove('hidden');
+            
+            if(!isAppsScript) {
+                mostrarToast("Cuenta creada (Modo Demo)");
+                cambiarPantalla('vista-login');
+            } else {
+                const n = document.getElementById('reg-nombre').value;
+                const u = document.getElementById('reg-usuario').value;
+                google.script.run.withSuccessHandler(res => {
+                    if(res.exito) { mostrarToast(res.mensaje); cambiarPantalla('vista-login'); }
+                    else { mostrarToast(res.mensaje, 'error'); }
+                }).registrarNuevoUsuario(n, u, p);
+            }
+        }
+
+        function cerrarSesion() {
+            usuarioActual = null; usernameLogueado = null; rolActual = 'tecnico';
+            document.getElementById('form-login').reset();
+            
+            // Restaurar el botón de login y ocultar errores
+            const btnLogin = document.getElementById('btn-login');
+            if(btnLogin) {
+                btnLogin.disabled = false;
+                btnLogin.innerText = 'Iniciar Sesión';
+            }
+            const errorLogin = document.getElementById('login-error');
+            if(errorLogin) {
+                errorLogin.classList.add('hidden');
+            }
+            
+            cambiarPantalla('vista-login');
+        }
+
+        // CONTROL DE ACCESOS Y ROLES
+        function intentarAcceso(modulo) {
+            if (rolActual === 'admin') {
+                ejecutarModulo(modulo);
+            } else {
+                // Bloqueado para técnicos, pedimos autorización Admin
+                moduloPendiente = modulo;
+                abrirModal('modal-autorizacion');
+            }
+        }
+
+        function ejecutarModulo(modulo) {
+            if(modulo === 'Inventario') abrirModuloInventario();
+            if(modulo === 'Entradas') abrirMovimientos('Entrada');
+            if(modulo === 'Info') cambiarPantalla('vista-info');
+            if(modulo === 'Historial') abrirHistorial();
+            if(modulo === 'Usuarios') abrirGestionUsuarios();
+        }
+
+        function procesarAutorizacion(e) {
+            e.preventDefault();
+            const u = document.getElementById('auth-usuario').value;
+            const p = document.getElementById('auth-password').value;
+            
+            // Verificamos si las credenciales puestas son de un admin
+            let isAdminValido = false;
+            if(!isAppsScript) {
+                let userAdmin = usuariosDb.find(x => x.usuario === u && x.rol === 'admin');
+                if (userAdmin && p === '1234') isAdminValido = true;
+                if (u === 'admin' && p === '1234') isAdminValido = true;
+            } else {
+                // En Apps Script harías la validación contra tu hoja de usuarios
+                // Por ahora simulamos el bypass seguro
+                if (u === 'admin' && p === '1234') isAdminValido = true; 
+            }
+
+            if(isAdminValido) {
+                cerrarModal('modal-autorizacion');
+                document.getElementById('form-autorizacion').reset();
+                if (moduloPendiente) {
+                    ejecutarModulo(moduloPendiente);
+                    moduloPendiente = null;
+                }
+                mostrarToast("Autorización Admin Correcta");
+            } else {
+                const err = document.getElementById('auth-error');
+                if(err) {
+                    err.classList.remove('hidden');
+                    setTimeout(() => err.classList.add('hidden'), 3000);
+                }
+            }
+        }
+
+        // MÓDULO GESTIÓN DE USUARIOS
+        function abrirGestionUsuarios() {
+            cambiarPantalla('vista-usuarios');
+            renderizarUsuarios();
+        }
+
+        function renderizarUsuarios() {
+            const tbody = document.getElementById('tabla-usuarios');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            usuariosDb.forEach((u, i) => {
+                const esAdmin = u.rol === 'admin';
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 transition-colors hover:bg-slate-50">
+                        <td class="p-5 font-mono font-black text-slate-800 text-[11px]">${u.usuario}</td>
+                        <td class="p-5 font-bold text-slate-600 uppercase text-[11px]">${u.nombre}</td>
+                        <td class="p-5 text-center">
+                            <select onchange="cambiarRolUsuario(${i}, this.value)" class="py-1.5 px-3 rounded-lg outline-none font-black text-[9px] uppercase tracking-widest cursor-pointer shadow-sm border ${esAdmin ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : 'border-slate-200 bg-white text-slate-600'} transition-all focus:ring-2 focus:ring-indigo-500/20 text-center w-36">
+                                <option value="admin" ${esAdmin ? 'selected' : ''}>ADMINISTRADOR</option>
+                                <option value="tecnico" ${!esAdmin ? 'selected' : ''}>TÉCNICO</option>
+                            </select>
+                        </td>
+                        <td class="p-5 text-center"><span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-md text-[8px] font-black uppercase tracking-[0.2em]"><i class="fas fa-circle text-[5px] mr-1"></i> Activo</span></td>
+                        <td class="p-5 text-center">
+                            <button onclick="eliminarUsuario(${i})" class="h-7 w-7 rounded-md bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition-colors inline-flex items-center justify-center shadow-sm"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function cambiarRolUsuario(index, nuevoRol) {
+            usuariosDb[index].rol = nuevoRol;
+            mostrarToast("Permisos actualizados correctamente");
+            
+            // Lógica para enviar el cambio de permisos a la Base de Datos (Apps Script)
+            if(isAppsScript) {
+                google.script.run.actualizarRolUsuarioBD(usuariosDb[index].usuario, nuevoRol);
+            }
+            
+            renderizarUsuarios();
+        }
+
+        function guardarNuevoUsuario(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nu-nombre').value;
+            const usuario = document.getElementById('nu-usuario').value;
+            const password = document.getElementById('nu-password').value;
+            const passwordConfirm = document.getElementById('nu-password-confirm').value;
+            const rol = document.getElementById('nu-rol').value;
+
+            if (password !== passwordConfirm) {
+                mostrarToast("Las contraseñas no coinciden", "error");
+                return;
+            }
+
+            // Verificar si el usuario ya existe en la lista local para evitar duplicados
+            if (usuariosDb.some(u => u.usuario.toLowerCase() === usuario.toLowerCase())) {
+                mostrarToast("El nombre de usuario ya existe", "error");
+                return;
+            }
+
+            const nuevoUser = { usuario: usuario, nombre: nombre, rol: rol, estado: 'Activo' };
+
+            if(!isAppsScript) {
+                // Modo local (Vista Previa Visual)
+                usuariosDb.push(nuevoUser);
+                renderizarUsuarios();
+                cerrarModal('modal-nuevo-usuario');
+                document.getElementById('form-nuevo-usuario').reset();
+                mostrarToast("Usuario registrado exitosamente");
+            } else {
+                // Modo Producción (Conectado a la Base de Datos)
+                google.script.run.withSuccessHandler(res => {
+                    if(res.exito) {
+                        usuariosDb.push(nuevoUser);
+                        renderizarUsuarios();
+                        cerrarModal('modal-nuevo-usuario');
+                        document.getElementById('form-nuevo-usuario').reset();
+                        mostrarToast("Usuario guardado en base de datos");
+                    } else {
+                        mostrarToast(res.mensaje || "Error al guardar el usuario", "error");
+                    }
+                }).registrarNuevoUsuarioBD(nombre, usuario, password, rol); 
+                // NOTA: Asegúrate de tener la función `registrarNuevoUsuarioBD(nombre, usuario, password, rol)` en tu archivo de base de datos / servidor.
+            }
+        }
+
+        function eliminarUsuario(index) {
+            const user = usuariosDb[index];
+            
+            // Reglas de protección básicas
+            if(user.usuario === 'admin') {
+                mostrarToast("No se puede eliminar al administrador principal", "error");
+                return;
+            }
+            if(user.usuario === usernameLogueado) {
+                mostrarToast("No puedes eliminar tu propia cuenta", "error");
+                return;
+            }
+            
+            // Prepara y abre el modal de confirmación
+            document.getElementById('texto-eliminar-usuario').innerText = `Usuario: ${user.usuario}`;
+            document.getElementById('index-eliminar-usuario').value = index;
+            abrirModal('modal-confirmar-eliminar');
+        }
+
+        function confirmarEliminarUsuario() {
+            const index = document.getElementById('index-eliminar-usuario').value;
+            const user = usuariosDb[index];
+            
+            if(!isAppsScript) {
+                // Modo local
+                usuariosDb.splice(index, 1);
+                renderizarUsuarios();
+                cerrarModal('modal-confirmar-eliminar');
+                mostrarToast("Usuario eliminado correctamente");
+            } else {
+                // Modo Producción (Con Base de Datos)
+                google.script.run.withSuccessHandler(res => {
+                    if(res.exito) {
+                        usuariosDb.splice(index, 1);
+                        renderizarUsuarios();
+                        cerrarModal('modal-confirmar-eliminar');
+                        mostrarToast("Usuario eliminado de la BD");
+                    } else {
+                        mostrarToast(res.mensaje || "Error al eliminar de la BD", "error");
+                    }
+                }).eliminarUsuarioBD(user.usuario); 
+                // NOTA: Asegúrate de tener la función `eliminarUsuarioBD(usuario_id)` en tu archivo de base de datos / servidor.
+            }
+        }
+
+        function cargarDatos() {
+            if (!isAppsScript) {
+                inventario = [
+                    { fila: 2, codigo: 'REF-1029', nombre: 'Servomotor Eje Principal X', robots: 'KUKA KR 210', stock: 12, min: 5, categoria: 'Eléctrica' },
+                    { fila: 3, codigo: 'REF-5501', nombre: 'Banda Dentada HTD 8M', robots: 'FANUC R-2000i', stock: 2, min: 4, categoria: 'Mecánica' }
+                ];
+                historial = [
+                    { date: new Date(), codigo: 'REF-1029', cantidad: 1, notes: 'Técnico: Juan Perez | Turno: 1 | Celda: L-05 | Falla: Servomotor quemado | Acción: Reemplazo total' },
+                    { date: new Date(), codigo: 'REF-5501', cantidad: 2, notes: 'Técnico: Luis Gomez | Turno: 2 | Celda: L-02 | Falla: Desgaste excesivo | Acción: Cambio preventivo' }
+                ];
+                actualizarInterfaz();
+                actualizarTablaHistorial();
+                datosCargados = true;
+            } else {
+                google.script.run.withSuccessHandler(d => { 
+                  inventario = d; 
+                  actualizarInterfaz(); 
+                  datosCargados = true; 
+                  google.script.run.withSuccessHandler(h => { historial = h; actualizarTablaHistorial(); }).obtenerHistorial();
+                }).obtenerInventario();
+            }
+        }
+
+        function actualizarInterfaz() {
+            const tbody = document.getElementById('tabla-inventario');
+            const search = document.getElementById('buscador').value.toLowerCase();
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            let bajas = 0;
+
+            inventario.forEach((item, i) => {
+                const stockMin = parseInt(item.min) || 5;
+                if(item.stock <= stockMin) bajas++;
+                if(search && !item.codigo.toLowerCase().includes(search) && !item.nombre.toLowerCase().includes(search)) return;
+
+                const statusBg = item.stock === 0 ? 'bg-rose-100 text-rose-600' : (item.stock <= stockMin ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600');
+                const statusTxt = item.stock === 0 ? 'AGOTADO' : (item.stock <= stockMin ? 'CRÍTICO' : 'STOCK OK');
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-50 transition-colors tr-hover">
+                        <td class="p-4 font-mono font-black text-cie-orange tracking-widest text-[11px]">${item.codigo}</td>
+                        <td class="p-4 font-bold text-slate-700 uppercase tracking-tighter text-[11px]">${item.nombre}</td>
+                        <td class="p-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">${item.robots || 'N/A'}</td>
+                        <td class="p-4 text-center text-lg font-black text-slate-900">${item.stock}</td>
+                        <td class="p-4 text-center"><span class="px-4 py-1.5 rounded-full font-black text-[8px] uppercase tracking-[0.2em] ${statusBg}">${statusTxt}</span></td>
+                    </tr>`;
+            });
+            document.getElementById('stat-total').innerText = inventario.length;
+            document.getElementById('stat-bajas').innerText = bajas;
+        }
+
+        document.getElementById('buscador').addEventListener('input', actualizarInterfaz);
+
+        function abrirMovimientos(tipo) {
+            document.getElementById('mov-tipo').value = tipo;
+            const ind = document.getElementById('indicador-movimiento');
+            const camposExtra = document.getElementById('campos-tecnicos-salida');
+            document.getElementById('titulo-movimiento').innerText = tipo === 'Entrada' ? 'Registrar Entrada' : 'Registrar Salida';
+            
+            if (tipo === 'Entrada') {
+                ind.className = "w-full py-2.5 px-6 rounded-xl font-black text-center uppercase tracking-[0.2em] text-[10px] bg-emerald-50 border border-emerald-200 text-emerald-600 shadow-sm transition-colors";
+                ind.innerHTML = '<div class="flex items-center justify-center gap-2"><i class="fas fa-arrow-down text-sm"></i> <span>ENTRADA DE REFACCIÓN</span></div>';
+                if(camposExtra) camposExtra.classList.add('hidden');
+                document.querySelectorAll('#campos-tecnicos-salida input, #campos-tecnicos-salida select, #campos-tecnicos-salida textarea').forEach(el => el.required = false);
+            } else {
+                ind.className = "w-full py-2.5 px-6 rounded-xl font-black text-center uppercase tracking-[0.2em] text-[10px] bg-rose-50 border border-rose-200 text-rose-600 shadow-sm transition-colors";
+                ind.innerHTML = '<div class="flex items-center justify-center gap-2"><i class="fas fa-arrow-up text-sm"></i> <span>SALIDA DE REFACCIÓN</span></div>';
+                if(camposExtra) camposExtra.classList.remove('hidden');
+                document.querySelectorAll('#campos-tecnicos-salida input, #campos-tecnicos-salida select, #campos-tecnicos-salida textarea').forEach(el => el.required = true);
+            }
+            const form = document.getElementById('form-movimiento');
+            if(form) form.reset();
+            buscarPiezaMovimiento();
+            cambiarPantalla('vista-movimientos');
+        }
+
+        function buscarPiezaMovimiento() {
+            const cod = document.getElementById('mov-codigo').value.trim().toUpperCase();
+            const nom = document.getElementById('mov-nombre');
+            const btn = document.getElementById('btn-submit-mov');
+            const idx = inventario.findIndex(x => x.codigo.toUpperCase() === cod);
+            if(idx !== -1) {
+                nom.value = `${inventario[idx].nombre} | STOCK: ${inventario[idx].stock}`;
+                nom.className = "w-full py-2 px-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center text-emerald-600 font-black text-[11px] outline-none uppercase tracking-tighter shadow-sm transition-colors";
+                document.getElementById('mov-refaccion-index').value = idx;
+                btn.disabled = false; btn.className = "w-full bg-cie-dark text-white font-black py-3 rounded-xl shadow-md uppercase tracking-[0.2em] hover:bg-slate-800 transition-all active:scale-[0.98] text-[10px]";
+                btn.innerText = "CONFIRMAR OPERACIÓN";
+            } else {
+                nom.value = cod === "" ? "---" : "❌ NO ENCONTRADA EN SISTEMA";
+                nom.className = cod === "" 
+                    ? "w-full py-2 px-4 bg-white border border-slate-200 rounded-xl text-center text-slate-400 font-black text-[11px] outline-none uppercase tracking-tighter shadow-sm transition-colors"
+                    : "w-full py-2 px-4 bg-rose-50 border border-rose-200 rounded-xl text-center text-rose-500 font-black text-[11px] outline-none uppercase tracking-tighter shadow-sm transition-colors";
+                btn.disabled = true; btn.className = "w-full bg-slate-200 text-slate-400 font-black py-3 rounded-xl uppercase tracking-[0.2em] cursor-not-allowed shadow-sm text-[10px]";
+                btn.innerText = "ESPERANDO CÓDIGO VÁLIDO";
+            }
+        }
+
+        function consultarInfoRefaccion() {
+            const cod = document.getElementById('info-codigo').value.trim().toUpperCase();
+            const res = document.getElementById('info-resultado');
+            const ph = document.getElementById('info-placeholder');
+            const idx = inventario.findIndex(x => x.codigo.toUpperCase() === cod);
+
+            if(idx !== -1) {
+                const p = inventario[idx];
+                const stockMin = parseInt(p.min) || 5;
+                document.getElementById('info-nombre').innerText = p.nombre;
+                document.getElementById('info-val-codigo').innerText = p.codigo;
+                document.getElementById('info-val-robots').innerText = p.robots || 'TODOS LOS MODELOS';
+                document.getElementById('info-val-stock').innerText = p.stock;
+                document.getElementById('info-val-min').innerText = stockMin;
+                document.getElementById('info-val-cat').innerText = p.categoria || 'GENERAL';
+                
+                const badge = document.getElementById('info-status-badge');
+                const bar = document.getElementById('info-stock-indicator');
+                let pct = (p.stock / (stockMin * 2.5)) * 100;
+                bar.style.width = Math.min(pct, 100) + "%";
+
+                if(p.stock === 0) { badge.innerText = "AGOTADA"; badge.className = "status-badge bg-rose-600 text-white"; bar.className = "absolute bottom-0 left-0 h-1 bg-rose-600"; }
+                else if (p.stock <= stockMin) { badge.innerText = "PEDIDO URGENTE"; badge.className = "status-badge bg-amber-500 text-white"; bar.className = "absolute bottom-0 left-0 h-1 bg-amber-500"; }
+                else { badge.innerText = "STOCK SUFICIENTE"; badge.className = "status-badge bg-emerald-500 text-white"; bar.className = "absolute bottom-0 left-0 h-1 bg-emerald-500"; }
+                if(res) res.classList.remove('hidden'); 
+                if(ph) ph.classList.add('hidden');
+            } else { 
+                if(res) res.classList.add('hidden'); 
+                if(ph) ph.classList.remove('hidden'); 
+            }
+        }
+
+        function iniciarEscanerInventario() {
+            abrirModal('modal-escaner');
+            if(!escanerCamara) escanerCamara = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250 });
+            escanerCamara.render((txt) => {
+                document.getElementById('buscador').value = txt;
+                actualizarInterfaz();
+                detenerEscaner();
+            }, () => {});
+        }
+
+        function abrirHistorial() {
+            cambiarPantalla('vista-reportes');
+            if (isAppsScript) {
+                google.script.run.withSuccessHandler(h => { historial = h; actualizarTablaHistorial(); }).obtenerHistorial();
+            } else {
+                actualizarTablaHistorial();
+            }
+        }
+
+        function actualizarTablaHistorial() {
+            const tbody = document.getElementById('tabla-historial');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            historial.forEach(h => {
+                const parsear = (key) => {
+                    const noteStr = h.notes || h.notas || "";
+                    const parts = noteStr.split('|');
+                    const part = parts.find(p => p.toLowerCase().includes(key.toLowerCase()));
+                    return part ? part.split(':')[1]?.trim() : '---';
+                };
+                const fecha = h.date ? new Date(h.date).toLocaleString('es-MX', { hour12: false }) : 'N/A';
+                tbody.innerHTML += `
+                    <tr class="tr-hover border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td class="p-5 text-slate-500 font-medium">${fecha}</td>
+                        <td class="p-5 font-mono font-black text-cie-orange">${h.codigo}</td>
+                        <td class="p-5 text-center font-black">${h.cantidad}</td>
+                        <td class="p-5 uppercase text-slate-800">${parsear('Técnico')}</td>
+                        <td class="p-5 text-center"><span class="px-3 py-1 bg-slate-100 rounded-md">${parsear('Turno')}</span></td>
+                        <td class="p-5 text-center"><span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-md">${parsear('Celda')}</span></td>
+                        <td class="p-5 italic uppercase text-[9px] text-slate-500">${parsear('Acción')}</td>
+                        <td class="p-5 font-bold uppercase text-[9px] text-rose-500">${parsear('Falla')}</td>
+                    </tr>`;
+            });
+        }
+
+        function guardarMovimiento(e) {
+            e.preventDefault();
+            const tipo = document.getElementById('mov-tipo').value;
+            const idx = document.getElementById('mov-refaccion-index').value;
+            const cant = parseInt(document.getElementById('mov-cantidad').value);
+            if(tipo === 'Salida' && inventario[idx].stock < cant) return mostrarToast("Stock Insuficiente", "error");
+            
+            let notaFinal = 'Entrada de Almacén';
+            
+            if (tipo === 'Salida') {
+                const tecnico = document.getElementById('mov-tecnico').value;
+                const turno = document.getElementById('mov-turno').value;
+                const celda = document.getElementById('mov-celda').value;
+                const falla = document.getElementById('mov-falla').value;
+                const accion = document.getElementById('mov-accion').value;
+                notaFinal = `Técnico: ${tecnico} | Turno: ${turno} | Celda: ${celda} | Falla: ${falla} | Acción: ${accion}`;
+            }
+                
+            if(!isAppsScript) {
+                inventario[idx].stock += (tipo === 'Entrada' ? cant : -cant);
+                historial.unshift({ date: new Date(), codigo: inventario[idx].codigo, cantidad: cant, notes: notaFinal });
+                actualizarInterfaz();
+                actualizarTablaHistorial();
+            } else {
+                google.script.run.withSuccessHandler(() => { cargarDatos(); }).registrarMovimientoSheet({
+                    fila: inventario[idx].fila, tipo: tipo, codigo: inventario[idx].codigo, cantidad: cant, notes: notaFinal
+                });
+            }
+            mostrarToast("Operación Exitosa");
+            cambiarPantalla('vista-menu');
+        }
+
+        function guardarNuevaRefaccion(e) {
+            e.preventDefault();
+            const item = {
+                codigo: document.getElementById('nuevo-codigo').value.toUpperCase(),
+                nombre: document.getElementById('nuevo-nombre').value,
+                robots: document.getElementById('nuevo-robots').value,
+                min: parseInt(document.getElementById('nuevo-stock-minimo').value),
+                stock: 0, categoria: 'GENERAL'
+            };
+            if(!isAppsScript) {
+                inventario.push(item);
+                actualizarInterfaz();
+                cerrarModal('modal-nuevo');
+            } else {
+                google.script.run.withSuccessHandler(() => { cargarDatos(); cerrarModal('modal-nuevo'); }).guardarNuevaRefaccionSheet(item);
+            }
+            mostrarToast("Catálogo actualizado");
+        }
+
+        function iniciarEscanerInfo() {
+            abrirModal('modal-escaner');
+            if(!escanerCamara) escanerCamara = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250 });
+            escanerCamara.render((txt) => { document.getElementById('info-codigo').value = txt; consultarInfoRefaccion(); detenerEscaner(); }, () => {});
+        }
+
+        function iniciarEscaner() {
+            abrirModal('modal-escaner');
+            if(!escanerCamara) escanerCamara = new Html5QrcodeScanner("reader", { fps: 15, qrbox: 250 });
+            escanerCamara.render((txt) => { document.getElementById('mov-codigo').value = txt; buscarPiezaMovimiento(); detenerEscaner(); }, () => {});
+        }
+
+        function detenerEscaner() { if(escanerCamara) escanerCamara.clear(); cerrarModal('modal-escaner'); }
+        function abrirModuloInventario() { if(!datosCargados) cargarDatos(); cambiarPantalla('vista-inventario'); }
+
+        function abrirModal(id) { 
+            const modal = document.getElementById(id);
+            if(modal) {
+                modal.classList.remove('hidden'); 
+            }
+        }
+        
+        function cerrarModal(id) { 
+            const modal = document.getElementById(id);
+            if(modal) {
+                modal.classList.add('hidden'); 
+            }
         }
     </script>
 </body>
